@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Cube - Lab4</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            perspective: 800px;
+        }
+        .cube {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            transform-style: preserve-3d;
+            transform: rotateX(30deg) rotateY(30deg);
+        }
+        .face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 2px solid #333;
+            opacity: 0.9;
+            box-sizing: border-box;
+        }
+        .front {
+            transform: translateZ(100px);
+            background: linear-gradient(135deg, #ff6b6b, #c92a2a);
+        }
+        .back {
+            transform: rotateY(180deg) translateZ(100px);
+            background: linear-gradient(135deg, #4dabf7, #1971c2);
+        }
+        .left {
+            transform: rotateY(-90deg) translateZ(100px);
+            background: linear-gradient(135deg, #69db7e, #2b8a3e);
+        }
+        .right {
+            transform: rotateY(90deg) translateZ(100px);
+            background: linear-gradient(135deg, #ffa94d, #e67700);
+        }
+        .top {
+            transform: rotateX(90deg) translateZ(100px);
+            background: linear-gradient(135deg, #da77f2, #9c36b5);
+        }
+        .bottom {
+            transform: rotateX(-90deg) translateZ(100px);
+            background: linear-gradient(135deg, #3bc9db, #0b7285);
+        }
+    </style>
+</head>
+<body>
+    <div class="cube">
+        <div class="face front"></div>
+        <div class="face back"></div>
+        <div class="face left"></div>
+        <div class="face right"></div>
+        <div class="face top"></div>
+        <div class="face bottom"></div>
+    </div>
+</body>
+</html>
