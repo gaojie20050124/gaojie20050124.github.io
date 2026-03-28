@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>BMW M3 - Real Car</title>
+    <title>BMW M3 Driving</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background: #2c3e2f;
+            background: #1a4a5a;
         }
         .car {
             position: absolute;
-            bottom: 100px;
+            top: -200px;
             left: -400px;
-            width: 350px;
-            animation: drive 4s linear forwards;
+            width: 320px;
+            animation: drive 5s linear forwards;
         }
         .car img {
             width: 100%;
@@ -22,18 +22,18 @@
         @keyframes drive {
             0% {
                 left: -400px;
-                bottom: 100px;
+                top: -200px;
             }
             100% {
                 left: 100%;
-                bottom: 300px;
+                top: 100%;
             }
         }
     </style>
 </head>
 <body>
     <div class="car">
-        < img src="bmw.png" alt="BMW M3">
+        < img src="bmw.jpg" alt="BMW M3">
     </div>
 </body>
 </html>
