@@ -2,33 +2,336 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>BMW M3 Driving</title>
+    <title>BMW M3 - Pure CSS</title>
     <style>
-        body {
+        * {
             margin: 0;
-            overflow: hidden;
-            background: linear-gradient(145deg, #0a2f3a, #1a4a5a);
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #0a2f3a 0%, #1a4a5a 100%);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 地面和道路 */
+        .road {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 150px;
+            background: #2c2e2f;
+        }
+
+        .road-lines {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            height: 6px;
+            background: repeating-linear-gradient(90deg, #ffdd88, #ffdd88 60px, transparent 60px, transparent 120px);
+            transform: translateY(-50%);
+        }
+
+        /* 汽车容器 */
         .car {
             position: absolute;
-            bottom: 50px;
-            left: -350px;
-            width: 320px;
-            animation: drive 6s linear forwards;
+            bottom: 45px;
+            left: -400px;
+            width: 360px;
+            height: 130px;
+            animation: drive 6s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+            z-index: 10;
         }
-        .car img {
+
+        /* 车身 */
+        .body {
+            position: absolute;
+            bottom: 0;
             width: 100%;
-            display: block;
+            height: 65px;
+            background: linear-gradient(135deg, #1a472a, #0d2a1a);
+            border-radius: 35px 35px 18px 18px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4), inset 0 2px 5px rgba(255,255,255,0.2);
         }
+
+        /* 车顶/车窗区 */
+        .roof {
+            position: absolute;
+            bottom: 45px;
+            left: 40px;
+            width: 280px;
+            height: 55px;
+            background: linear-gradient(145deg, #1e2a3a, #0f1720);
+            border-radius: 35px 35px 18px 18px;
+            box-shadow: inset 0 1px 4px rgba(255,255,255,0.2);
+        }
+
+        /* 前挡风玻璃 */
+        .windscreen-front {
+            position: absolute;
+            left: 28px;
+            top: 10px;
+            width: 75px;
+            height: 35px;
+            background: linear-gradient(145deg, #5a6e7a, #3a4a5a);
+            border-radius: 18px 12px 8px 8px;
+            box-shadow: inset 0 1px 3px rgba(255,255,255,0.4);
+        }
+
+        /* 后挡风玻璃 */
+        .windscreen-back {
+            position: absolute;
+            right: 28px;
+            top: 10px;
+            width: 75px;
+            height: 35px;
+            background: linear-gradient(145deg, #5a6e7a, #3a4a5a);
+            border-radius: 12px 18px 8px 8px;
+            box-shadow: inset 0 1px 3px rgba(255,255,255,0.4);
+        }
+
+        /* 侧窗 */
+        .side-window {
+            position: absolute;
+            top: 14px;
+            width: 55px;
+            height: 32px;
+            background: #4a627a;
+            border-radius: 12px;
+            box-shadow: inset 0 1px 3px rgba(255,255,255,0.3);
+        }
+
+        .window-left { left: 110px; }
+        .window-right { right: 110px; }
+
+        /* B柱 */
+        .b-pillar {
+            position: absolute;
+            top: 14px;
+            left: 178px;
+            width: 8px;
+            height: 32px;
+            background: #1a1a2a;
+            border-radius: 2px;
+        }
+
+        /* 车轮 */
+        .wheel {
+            position: absolute;
+            bottom: -10px;
+            width: 48px;
+            height: 48px;
+            background: radial-gradient(circle at 35% 35%, #2c2c2c, #0a0a0a);
+            border-radius: 50%;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.2);
+            animation: rotateWheel 0.3s linear infinite;
+        }
+
+        .wheel::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle, #ccc, #888);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .wheel::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, #ffcc44, #aa8833);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .wheel-front { right: 20px; }
+        .wheel-back { left: 20px; }
+
+        /* 宝马双肾格栅 */
+        .grille {
+            position: absolute;
+            right: -8px;
+            top: 14px;
+            width: 38px;
+            height: 42px;
+            background: linear-gradient(135deg, #3a3a4a, #1a1a2a);
+            border-radius: 12px 8px 8px 12px;
+            box-shadow: inset 0 0 0 1px #aaa;
+        }
+
+        .grille::before {
+            content: "";
+            position: absolute;
+            left: 6px;
+            top: 8px;
+            width: 26px;
+            height: 26px;
+            background: repeating-linear-gradient(90deg, #555, #555 5px, #222 5px, #222 10px);
+            border-radius: 6px;
+        }
+
+        /* 大灯 */
+        .headlight {
+            position: absolute;
+            right: -14px;
+            top: 24px;
+            width: 18px;
+            height: 18px;
+            background: radial-gradient(circle, #fff, #ffcc88);
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(255,220,100,0.8);
+            animation: headlightGlow 0.8s infinite alternate;
+        }
+
+        /* 尾灯 */
+        .taillight {
+            position: absolute;
+            left: -14px;
+            top: 24px;
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle, #ff4444, #aa2222);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255,80,80,0.7);
+        }
+
+        /* 门把手 */
+        .handle {
+            position: absolute;
+            top: 32px;
+            width: 28px;
+            height: 5px;
+            background: linear-gradient(135deg, #ddccaa, #aa9977);
+            border-radius: 3px;
+        }
+        .handle-left { left: 140px; }
+        .handle-right { right: 140px; }
+
+        /* 后视镜 */
+        .mirror {
+            position: absolute;
+            top: 30px;
+            width: 18px;
+            height: 14px;
+            background: #2c2c3a;
+            border-radius: 6px 4px 4px 6px;
+        }
+        .mirror-left { left: -6px; }
+        .mirror-right { right: -6px; }
+
+        /* 动画 */
+        @keyframes rotateWheel {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes headlightGlow {
+            0% { box-shadow: 0 0 8px rgba(255,220,100,0.5); }
+            100% { box-shadow: 0 0 20px rgba(255,220,100,1); }
+        }
+
         @keyframes drive {
-            0% { left: -350px; bottom: 30px; }
-            100% { left: 100%; bottom: 280px; }
+            0% {
+                left: -420px;
+                bottom: 40px;
+            }
+            30% {
+                bottom: 80px;
+            }
+            60% {
+                bottom: 140px;
+            }
+            100% {
+                left: calc(100% + 50px);
+                bottom: 260px;
+            }
         }
+
+        /* 环境元素 */
+        .cloud {
+            position: absolute;
+            background: rgba(255,255,255,0.85);
+            border-radius: 80% 20% 85% 15% / 70% 60% 40% 30%;
+            filter: blur(5px);
+        }
+        .cloud1 { width: 100px; height: 60px; top: 50px; left: 10%; }
+        .cloud2 { width: 140px; height: 80px; top: 120px; right: 15%; }
+        .cloud3 { width: 80px; height: 50px; top: 180px; left: 35%; }
+
+        .sun {
+            position: absolute;
+            top: 40px;
+            right: 70px;
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle, #ffdd77, #ffaa33);
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(255,200,100,0.6);
+        }
+
+        .tree {
+            position: absolute;
+            bottom: 85px;
+            width: 22px;
+            height: 50px;
+            background: #5a4a3a;
+            border-radius: 6px;
+        }
+        .tree::before {
+            content: "";
+            position: absolute;
+            top: -22px;
+            left: -10px;
+            width: 42px;
+            height: 30px;
+            background: radial-gradient(circle, #5a9a4a, #2a6a2a);
+            border-radius: 50%;
+        }
+        .tree1 { left: 8%; bottom: 88px; }
+        .tree2 { left: 22%; bottom: 92px; width: 26px; height: 58px; }
+        .tree3 { right: 12%; bottom: 85px; }
     </style>
 </head>
 <body>
+    <div class="sun"></div>
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    <div class="cloud cloud3"></div>
+    <div class="tree tree1"></div>
+    <div class="tree tree2"></div>
+    <div class="tree tree3"></div>
+
+    <div class="road">
+        <div class="road-lines"></div>
+    </div>
+
     <div class="car">
-        < img src="https://i.imgur.com/6Z5qH5C.png" alt="BMW M3">
+        <div class="body"></div>
+        <div class="roof"></div>
+        <div class="windscreen-front"></div>
+        <div class="windscreen-back"></div>
+        <div class="side-window window-left"></div>
+        <div class="side-window window-right"></div>
+        <div class="b-pillar"></div>
+        <div class="wheel wheel-back"></div>
+        <div class="wheel wheel-front"></div>
+        <div class="grille"></div>
+        <div class="headlight"></div>
+        <div class="taillight"></div>
+        <div class="handle handle-left"></div>
+        <div class="handle handle-right"></div>
+        <div class="mirror mirror-left"></div>
+        <div class="mirror mirror-right"></div>
     </div>
 </body>
 </html>
