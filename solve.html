@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>解一元二次方程</title>
+</head>
+<body>
+    <h1>一元二次方程求解器</h1>
+    <p>请按顺序输入系数 a, b, c（假设 a > 0，Δ ≥ 0）</p >
+    <script>
+        // 1. 用 prompt 获取三个系数
+        let aInput = prompt("请输入系数 a (a > 0)：");
+        let bInput = prompt("请输入系数 b：");
+        let cInput = prompt("请输入系数 c：");
+
+        // 2. 转换为数字
+        let a = parseFloat(aInput);
+        let b = parseFloat(bInput);
+        let c = parseFloat(cInput);
+
+        // 检查输入是否有效
+        if (isNaN(a) || isNaN(b) || isNaN(c)) {
+            alert("输入无效，请确保输入的是数字！");
+            console.log("输入错误：a=" + aInput + ", b=" + bInput + ", c=" + cInput);
+        } else {
+            // 3. 计算判别式 delta
+            let delta = b * b - 4 * a * c;
+
+            // 4. 计算两个根
+            let x1 = (-b + Math.sqrt(delta)) / (2 * a);
+            let x2 = (-b - Math.sqrt(delta)) / (2 * a);
+
+            // 5. 用 alert 显示结果
+            alert("方程 " + a + "x² + " + b + "x + " + c + " = 0 的解为：\nx₁ = " + x1 + "\nx₂ = " + x2);
+
+            // 6. 用 console.log 输出相同结果
+            console.log("===== 方程求解结果 =====");
+            console.log("系数：a = " + a + ", b = " + b + ", c = " + c);
+            console.log("判别式 Δ = " + delta);
+            console.log("x₁ = " + x1);
+            console.log("x₂ = " + x2);
+        }
+    </script>
+</body>
+</html>
