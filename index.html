@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>3D 汉诺塔 · 彩虹圆盘</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { min-height: 100vh; background: linear-gradient(145deg, #6ec3e8 0%, #b87bff 100%); display: flex; justify-content: center; align-items: center; font-family: 'Segoe UI', system-ui, sans-serif; padding: 20px; }
+        .game-container { background: rgba(0,0,0,0.2); border-radius: 60px; padding: 20px; backdrop-filter: blur(3px); }
+        .game-panel { background: #fff5e6; border-radius: 50px; padding: 25px 35px 40px; box-shadow: 0 20px 35px rgba(0,0,0,0.3); }
+        .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 30px; background: #f5e5d0; padding: 12px 25px; border-radius: 80px; }
+        .control-group { display: flex; align-items: center; gap: 12px; background: white; padding: 6px 18px; border-radius: 50px; }
+        .control-group label { font-weight: bold; color: #5a3e1b; }
+        input, button { font-size: 1rem; font-weight: bold; border: none; border-radius: 40px; padding: 8px 18px; cursor: pointer; }
+        input { background: #fff8ed; border: 1px solid #d4b87a; width: 75px; }
+        button { background: #ffa559; color: #3b2a10; box-shadow: 0 4px 0 #a5661a; }
+        button:active { transform: translateY(2px); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .move-counter { background: #2c2b28; color: #ffd966; font-family: monospace; font-size: 1.7rem; font-weight: bold; padding: 0 20px; border-radius: 50px; text-align: center; }
+        .pegs-area { display: flex; justify-content: space-around; gap: 30px; margin: 30px 0 20px; perspective: 700px; flex-wrap: wrap; }
+        .peg-wrapper { text-align: center; width: 170px; cursor: pointer; }
+        .peg-wrapper.selected-peg { filter: drop-shadow(0 0 15px gold); }
+        .peg-label { font-size: 1.2rem; font-weight: bold; background: #e6cf95; display: inline-block; padding: 5px 20px; border-radius: 30px; margin-top: 12px; }
+        .peg { position: relative; width: 20px; height: 190px; background: linear-gradient(90deg, #8b6946, #dbb47a, #b8894f); margin: 0 auto; border-radius: 20px; box-shadow: 0 15px 20px rgba(0,0,0,0.35); transform-style: preserve-3d; transform: rotateX(5deg); }
+        .disks-stack { position: relative; height: 190px; display: flex; flex-direction: column-reverse; align-items: center; margin-top: -190px; pointer-events: none; }
+        .disk { position: relative; height: 30px; border-radius: 25px; background: radial-gradient(circle at 30% 40%, rgba(255,255,210,0.9), 70%, rgba(0,0,0,0.1)); box-shadow: 0 7px 10px rgba(0,0,0,0.3); margin-bottom: 5px; transform-style: preserve-3d; transform: translateZ(3px); cursor: pointer; pointer-events: auto; }
+        .warning-area { text-align: center; margin: 18px auto 0; min-height: 75px; }
+        .warning-message { background: #e03a3e; color: white; display: inline-block; padding: 10px 28px; border-radius: 50px; animation: shakeWarning 0.4s ease-in-out; }
+        .victory-message { background: #f5b042; color: #1f5c1f; animation: glowWin 0.7s infinite alternate; font-size: 1.3rem; }
+        @keyframes shakeWarning { 0% { transform: translateX(0); } 25% { transform: translateX(-9px); } 75% { transform: translateX(9px); } 100% { transform: translateX(0); } }
+        @keyframes glowWin { 0% { text-shadow: 0 0 2px gold; background: #ffdd88; } 100% { text-shadow: 0 0 22px rgb(255,200,0); background: #ffb347; } }
+        @media (max-width: 700px) { .peg-wrapper { width: 110px; } .disk { height: 24px; } .peg { height: 150px; } .disks-stack { height: 150px; margin-top: -150px; } .move-counter { font-size: 1.2rem; } }
+        footer { text-align: center; font-size: 0.75rem; color: #4a3920; margin-top: 18px; }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="game-panel">
+        <div class="controls">
+            <div class="control-group"><label>🎯 圆盘数</label><input type="number" id="diskCountInput" min="3" max="8" value="5"></div>
+            <div class="control-group"><span>📊 步数</span><span class="move-counter" id="moveCounter">0</span></div>
+            <button id="resetBtn">🔄 重置</button>
+            <button id="autoSolveBtn">✨ 自动求解</button>
+        </div>
+        <div class="pegs-area" id="pegsArea"></div>
+        <div class="warning-area" id="warningArea"></div>
+        <footer>💡 点击圆盘 → 再点击柱子移动 | 数组 push/pop/forEach/slice</footer>
+    </div>
+</div>
+<script>class HanoiGame {
+    constructor(disksCount) {
+        this.disksCount = Math.min(8, Math.max(3, disksCount));
+        this.pegs = [Array.from({length: this.disksCount}, (_,i) => this.disksCount - i), [], []];
+        this.moves = 0;
+        this.isAutoSolving = false;
+        this.selectedPeg = null;
+        this.win = false;
+        this.initEventListeners();
+    }
+    reset() {
+        if(this.isAutoSolving) return;
+        this.win = false;
+        this.selectedPeg = null;
+        this.moves = 0;
+        this.updateMoveUI();
+        const initial = Array.from({length: this.disksCount}, (_,i) => this.disksCount - i);
+        this.pegs = [initial.slice(), [], []];
+        this.hideVictory();
+        this.renderPegs();
+    }
+    setDisksCount(n) {
+        if(this.isAutoSolving) return;
+        this.disksCount = Math.min(8, Math.max(3, n));
+        this.reset();
+    }
+    isValidMove(from, to) {
+        if(from === to) return false;
+        const fromStack = this.pegs[from];
+        const toStack = this.pegs[to];
+        if(fromStack.length === 0) return false;
+        const diskFrom = fromStack[fromStack.length-1];
+        if(toStack.length === 0) return true;
+        return diskFrom < toStack[toStack.length-1];
+    }
+    executeMove(from, to) {
+        if(!this.isValidMove(from, to)) {
+            this.showWarning("❌ 大盘不能放小盘上！");
+            return false;
+        }
+        const disk = this.pegs[from].pop();
+        this.pegs[to].push(disk);
+        this.moves++;
+        this.updateMoveUI();
+        this.renderPegs();
+        if(this.pegs[2].length === this.disksCount) this.winGame();
+        return true;
+    }
+    tryMove(target) {
+        if(this.win || this.isAutoSolving) return;
+        if(this.selectedPeg === null) {
+            if(this.pegs[target].length > 0) {
+                this.selectedPeg = target;
+                this.renderPegs();
+            } else {
+                this.showWarning("👆 请先点击圆盘");
+            }
+        } else {
+            this.executeMove(this.selectedPeg, target);
+            this.selectedPeg = null;
+            this.renderPegs();
+        }
+    }
+    winGame() {
+        if(this.win) return;
+        this.win = true;
+        this.showWarning("🏆 胜利啦！🏆", true);
+        const w = document.querySelector("#warningArea .warning-message");
+        if(w) w.classList.add("victory-message");
+        this.renderPegs();
+    }
+    showWarning(msg, isVictory=false) {
+        const area = document.getElementById("warningArea");
+        if(this.win && !isVictory) return;
+        area.innerHTML = `<div class="warning-message">${msg}</div>`;
+        if(!isVictory) setTimeout(() => { if(area.firstChild) area.innerHTML = ""; }, 1500);
+    }
+    hideVictory() { document.getElementById("warningArea").innerHTML = ""; }
+    updateMoveUI() { document.getElementById("moveCounter").innerText = this.moves; }
+    renderPegs() {
+        const container = document.getElementById("pegsArea");
+        if(!container) return;
+        const labels = ['A','B','C'];
+        let html = '';
+        this.pegs.forEach((stack, idx) => {
+            const isSelected = (this.selectedPeg === idx);
+            let disksHtml = '';
+            stack.forEach(diskSize => {
+                const minW = 58, maxW = 170;
+                const w = minW + (diskSize-1)*(maxW-minW)/(this.disksCount-1);
+                const hue = (diskSize * 42) % 360;
+                disksHtml += `<div class="disk" data-peg="${idx}" style="width:${w}px; background:linear-gradient(145deg, hsl(${hue},85%,68%), hsl(${hue},85%,48%));"></div>`;
+            });
+            html += `<div class="peg-wrapper ${isSelected ? 'selected-peg' : ''}" data-peg-index="${idx}"><div class="peg"></div><div class="disks-stack">${disksHtml}</div><div class="peg-label">🗼 Peg ${labels[idx]}</div></div>`;
+        });
+        container.innerHTML = html;
+        document.querySelectorAll('.disk').forEach(disk => {
+            disk.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if(this.win || this.isAutoSolving) return;
+                const wrapper = disk.parentElement?.parentElement;
+                if(!wrapper) return;
+                const pegIdx = parseInt(wrapper.dataset.pegIndex);
+                if(this.pegs[pegIdx].length > 0) {
+                    this.selectedPeg = pegIdx;
+                    this.renderPegs();
+                }
+            });
+        });
+        document.querySelectorAll('.peg-wrapper').forEach(wrapper => {
+            wrapper.addEventListener('click', (e) => {
+                if(e.target.classList?.contains('disk')) return;
+                if(this.win || this.isAutoSolving) return;
+                const idx = parseInt(wrapper.dataset.pegIndex);
+                this.tryMove(idx);
+            });
+        });
+    }
+    async autoSolve() {
+        if(this.win || this.isAutoSolving) return;
+        this.isAutoSolving = true;
+        this.selectedPeg = null;
+        this.renderPegs();
+        this.disableButtons(true);
+        await this.solveHanoi(this.disksCount, 0, 2, 1);
+        this.isAutoSolving = false;
+        this.disableButtons(false);
+        this.renderPegs();
+    }
+    async solveHanoi(n, from, to, aux) {
+        if(n === 0) return;
+        await this.solveHanoi(n-1, from, aux, to);
+        await new Promise(resolve => setTimeout(() => {
+            if(this.isAutoSolving) this.executeMove(from, to);
+            resolve();
+        }, 450));
+        await this.solveHanoi(n-1, aux, to, from);
+    }
+    disableButtons(disabled) {
+        ['diskCountInput','resetBtn','autoSolveBtn'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.disabled = disabled;
+        });
+    }
+    initEventListeners() {
+        document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+        document.getElementById('autoSolveBtn').addEventListener('click', () => this.autoSolve());
+        const input = document.getElementById('diskCountInput');
+        input.addEventListener('change', (e) => {
+            let val = parseInt(e.target.value);
+            if(isNaN(val)) val = 5;
+            this.setDisksCount(val);
+            input.value = this.disksCount;
+        });
+    }
+    start() { this.reset(); this.renderPegs(); }
+}
+window.addEventListener('DOMContentLoaded', () => { new HanoiGame(5).start(); });
+</script>
+</body>
+</html>
